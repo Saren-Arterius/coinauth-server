@@ -9,6 +9,7 @@ WORKDIR /src
 # RUN sh -c 'echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && apk update'
 
 ADD package.json /src/package.json
+ADD yarn.lock /src/yarn.lock
 RUN yarn install
 
 CMD yarn dev
