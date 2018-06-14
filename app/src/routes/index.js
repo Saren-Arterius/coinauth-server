@@ -2,18 +2,9 @@ import express from 'express';
 
 import {CONFIG} from '../config';
 import {redis} from '../common';
+import {checkSession, checkValidUser} from '../utils/auth';
 
 const router = express.Router();
-
-const checkSession = async (req, res, next) => {
-  req.playerUUID = await redis.get(`session:uuid:${req.cookies.session_id}`);
-  if (!req.playerUUID) {
-    let err = new Error('NOT_FOUND');
-    err.status = 404;
-    return next(err);
-  }
-  return next();
-};
 
 router.get('/login/:session_id', (req, res, next) => {
   res.cookie('session_id', req.params.session_id);
@@ -50,27 +41,23 @@ router.get('/login', checkSession, async (req, res, next) => {
   return res.redirect(`${CONFIG.entry_path}/work`);
 });
 
-router.get('/work', checkSession, async (req, res, next) => {
-  if (!req.user) {
-    let err = new Error('LOGIN_REQURIED');
-    err.status = 401;
-    return next(err);
-  }
-  if (req.user.player_uuid !== req.playerUUID) {
-    let err = new Error('WRONG_ACCOUNT');
-    err.status = 403;
-    return next(err);
-  }
+
+router.get('/logout', (req, res, next) => {
+  return res.render('logout');
+});
+
+router.get('/work', checkSession, checkValidUser, async (req, res, next) => {
   let alreadyAuthed = await redis.exists(`session:auth:${req.cookies.session_id}`);
-  if (alreadyAuthed) {
+  if (!alreadyAuthed) {
     await redis.setex(`session:auth:${req.cookies.session_id}`, 60, 1);
     await redis.expire(`session:uuid:${req.cookies.session_id}`, 60);
   }
   return res.render('work');
 });
 
-router.get('/logout', (req, res, next) => {
-  return res.render('logout');
+router.post('/work', checkSession, checkValidUser, async (req, res, next) => {
+  await redis.expire(`session:uuid:${req.cookies.session_id}`, 60);
+  res.send();
 });
 
 module.exports = router;
