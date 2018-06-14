@@ -3,6 +3,7 @@ exports.CONFIG = {
     port: 6379, // Redis port
     host: 'redis', // Redis host
     family: 4, // 4 (IPv4) or 6 (IPv6)
+    password: 'password',
     db: 0
   },
   firebase: {

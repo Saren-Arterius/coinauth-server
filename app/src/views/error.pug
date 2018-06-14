@@ -14,7 +14,10 @@ block content
             p The page you requested was not found. Please ensure the URL is valid.
             - break
           when 'WRONG_ACCOUNT'
-            p Wrong associated account, please logout.
+            p Wrong associated account, either this web account or minecraft account has already been registered. Please logout and use another account.
+            - break
+          when 'LOGIN_REQURIED'
+            p You are not logged in. Please login minecraft server first, then click the URL sent to you to login.
             - break
           default
             p #{error.message}

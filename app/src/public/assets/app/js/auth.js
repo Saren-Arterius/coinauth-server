@@ -1,4 +1,4 @@
-/* globals firebase, $, document, window, config, alert, prompt, io */
+/* globals firebase, $, document, window, config, alert, prompt, localStorage */
 const blockUI = () => {
   if (!$('.block-ui-overlay')[0]) {
     $('body').append('<div class="block-ui-overlay" style="display: none"><div class="loader"></div></div>');
@@ -24,7 +24,7 @@ const logoutFirebase = async () => {
   blockUI();
   await firebase.auth().signOut();
   deleteCookie('authorization');
-  window.location = '/';
+  window.location = '/logout';
 };
 
 const providerSignIn = async (provider) => {
@@ -97,17 +97,26 @@ if (window.location.pathname.endsWith('/login')) { // If idt in cookie expired b
   blockUI();
 }
 
-const socket = io();
-
 firebase.auth().onAuthStateChanged(async (user) => {
   if (user) {
     const idt = await user.getIdToken();
     setCookie('authorization', idt);
     if (window.location.pathname.endsWith('/login')) {
+      let isStuck = parseInt(localStorage.getItem('test_login_stuck'), 10);
+      if (isStuck) {
+        unblockUI();
+        return;
+      }
+      localStorage.setItem('test_login_stuck', 1);
       window.location.reload();
+    } else {
+      localStorage.removeItem('test_login_stuck');
     }
-  } else if (window.location.pathname.endsWith('/login')) {
-    unblockUI();
+  } else {
+    if (window.location.pathname.endsWith('/login')) {
+      unblockUI();
+    }
+    localStorage.removeItem('test_login_stuck');
   }
 });
 // Prevent eslint nagging

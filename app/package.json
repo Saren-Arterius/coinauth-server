@@ -12,8 +12,8 @@
     "clean": "rm -rf dist && mkdir dist",
     "dev": "yarn build-watch & sleep 5 && nodemon --exec sh -c 'yarn start'",
     "prod": "yarn build && yarn start",
-    "build": "babel app/src --out-dir app/dist --copy-files",
-    "build-watch": "babel app/src --out-dir app/dist --copy-files --watch"
+    "build": "cd app/src; babel . --out-dir ../dist --copy-files",
+    "build-watch": "cd app/src; babel . --out-dir ../dist --copy-files --watch"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.51",
